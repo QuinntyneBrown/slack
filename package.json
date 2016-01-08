@@ -1,0 +1,26 @@
+{
+  "name": "slack",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.html",
+  "dependencies": {
+    "angular-route": "^1.4.8",
+    "css-loader": "^0.23.1",
+    "angular": "^1.4.8",
+    "gulp": "^3.9.0",
+    "gulp-webpack": "^1.5.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-util": "^3.0.7",
+    "ng-x": "^0.4.7",
+    "webpack": "^1.12.10",
+    "ts-loader": "^0.7.2",
+    "typescript": "^1.7.5",
+    "style-loader": "^0.13.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
