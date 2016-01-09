@@ -19,6 +19,14 @@
             self.storeInstance.emitChange({ id: options.id });
         }
     });
+
+    dispatcher.addListener({
+        actionType: PROFILE_ACTIONS.OTHER,
+        callback: function (options) {
+            self.other = options.data;
+            self.storeInstance.emitChange({ id: options.id });
+        }
+    });
     
     return self;
 }

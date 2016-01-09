@@ -17,6 +17,7 @@ namespace Slack.Controllers
         }
 
         [HttpGet]
+        [Route("getByCurrentProfile")]
         public IHttpActionResult GetByCurrentProfile()
             => Ok(uow.Conversations.GetAll()
                 .Include(x => x.Profiles)

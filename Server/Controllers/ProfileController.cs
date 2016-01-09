@@ -45,6 +45,12 @@ namespace Slack.Controllers
                 .ToList()
                 .Select(x=> new ProfileDto(x)));
 
+        [HttpGet]
+        [Authorize]
+        [Route("getProfileById")]
+        public IHttpActionResult GetById(int id)
+            => Ok(new ProfileDto(uow.Profiles.GetById(id)));
+        
         protected readonly IIdentityService identityService;
     }
 }

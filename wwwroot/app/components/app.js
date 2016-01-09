@@ -13,7 +13,7 @@ ngX.Component({
         '</div>'
     ],
     styles: [
-        ' body { ',
+        ' body, h1 { ',
         '   margin: 0; padding: 0;',
         '   font-family: "Lato", sans-serif;',
         '}'

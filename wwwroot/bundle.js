@@ -54,24 +54,29 @@
 
 	__webpack_require__(6);
 	__webpack_require__(7);
-	__webpack_require__(8);
-	__webpack_require__(9);
-	__webpack_require__(10);
+	__webpack_require__(8)
+	__webpack_require__(9)
+	__webpack_require__(10)
 	__webpack_require__(11);
-
 	__webpack_require__(12);
 	__webpack_require__(13);
 	__webpack_require__(14);
 	__webpack_require__(15);
-
 	__webpack_require__(16);
+
 	__webpack_require__(17);
 	__webpack_require__(18);
-
 	__webpack_require__(19);
 	__webpack_require__(20);
+
 	__webpack_require__(21);
 	__webpack_require__(22);
+	__webpack_require__(23);
+
+	__webpack_require__(24);
+	__webpack_require__(25);
+	__webpack_require__(26);
+	__webpack_require__(27);
 
 /***/ },
 /* 1 */
@@ -98,12 +103,13 @@
 	    LOGIN_FAIL: 1,
 	    REGISTER: 3,
 	    CURRENT_PROFILE: 4,
-	    OTHER_PROFILES: 5
+	    OTHER_PROFILES: 5,
+	    OTHER: 6
 	});
 
 	angular.module("app").value("CONVERSATION_ACTIONS", {
-	    GET_BY_CURRENT_PROFILE: 6,
-	    CURRENT: 7
+	    GET_BY_CURRENT_PROFILE: 7,
+	    CURRENT: 8
 	});
 
 	angular.module("app").value("MESSAGE_ACTIONS", {
@@ -209,6 +215,19 @@
 	        });
 	        return newGuid;
 	    }
+
+	    self.getOtherProfile = function (options) {
+	        var newGuid = guid();
+
+	        profileService.getProfileById({ id: options.id }).then(function (results) {
+	            dispatcher.emit({
+	                actionType: PROFILE_ACTIONS.OTHER, options:
+	                    { data: results, id: newGuid }
+	            });
+	        });
+	        return newGuid;
+	    }
+
 	    return self;
 	}
 
@@ -219,6 +238,39 @@
 
 /***/ },
 /* 6 */
+/***/ function(module, exports) {
+
+	function aboutConversationComponent(profileStore) {
+	    var self = this;
+	    self.other = profileStore.other;
+	    return self;
+	}
+
+	ngX.Component({
+	    isBootstrapped: true,
+	    selector: "about-conversation",
+	    component: aboutConversationComponent,
+	    template: [
+	        '<div class="aboutConversationComponent">',
+	        '<h1>About</h1>',
+	        '<h2>{{ ::vm.other.username }}</h2>',
+	        '</div>'
+	    ],
+	    providers: [
+	        'profileStore'
+	    ],
+	    styles: [
+	        ' .aboutConversationComponent { ',
+	        '   float:right;',
+	        '   width:312px; ',
+	        '   height:100%; ',
+	        ' } '
+	    ]
+	});
+
+
+/***/ },
+/* 7 */
 /***/ function(module, exports) {
 
 	function appComponent() {
@@ -236,7 +288,7 @@
 	        '</div>'
 	    ],
 	    styles: [
-	        ' body { ',
+	        ' body, h1 { ',
 	        '   margin: 0; padding: 0;',
 	        '   font-family: "Lato", sans-serif;',
 	        '}'
@@ -265,7 +317,185 @@
 	}]);
 
 /***/ },
-/* 7 */
+/* 8 */
+/***/ function(module, exports) {
+
+	function conversationDetailHeaderComponent(profileStore) {
+	    var self = this;
+
+	    self.other = profileStore.other;
+
+	    return self;
+	}
+
+	ngX.Component({
+	    isBootstrapped: true,
+	    selector: "conversation-detail-header",
+	    component: conversationDetailHeaderComponent,
+	    template: [
+	        '<div class="conversationDetailHeaderComponent">',
+	        '   <h1 data-ng-if="!vm.other">no conversations</h1>',
+	        '   <h1 data-ng-if="vm.other">@{{ ::vm.other.username }}</h1>',
+	        '</div>'
+	    ],
+	    providers: [
+	        "profileStore"
+	    ],
+	    styles: [
+	        ' .conversationDetailHeaderComponent { ',
+	        '   padding-left: 15px; ',
+	        '   width:100%; ',
+	        '   height:52px; ',
+	        ' } '
+	    ]
+	});
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	function conversationDetailComponent(profileStore) {
+	    var self = this;
+
+	    self.getOther = function () { return profileStore.other; }
+
+	    return self;
+	}
+
+	ngX.Component({
+	    isBootstrapped: true,
+	    selector: "conversation-detail",
+	    component: conversationDetailComponent,
+	    template: [
+	        '<div class="conversationDetailComponent">',
+	        '   <conversation-detail-header></conversation-detail-header>',
+	        '   <div class="conversationDetailComponent-body" data-ng-hide="!vm.getOther()">',
+	        '       <conversation-messages></conversation-messages>',
+	        '       <about-conversation></about-conversation>',
+	        '       <div style="clear:both;"></div>',
+	        '   </div>',
+	        '</div>'
+	    ],
+	    providers: [
+	        'profileStore'
+	    ],
+	    styles: [
+	        ' .conversationDetailComponent, .conversationDetailComponent-body { height:100%; } '
+	    ]
+	});
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports) {
+
+	function conversationListHeaderComponent(profileStore) {
+	    var self = this;
+
+	    self.current = profileStore.current;
+
+	    return self;
+	}
+
+	ngX.Component({
+	    isBootstrapped: true,
+	    selector: "conversation-list-header",
+	    component: conversationListHeaderComponent,
+	    template: [
+	        '<div class="conversationListHeaderComponent">',
+	        '   <h1 class="conversationListHeaderComponent-heading">slackish</h1>',
+	        '   <span>{{ ::vm.current.username }}</span>',
+	        '</div>'
+	    ],
+	    providers: [
+	        'profileStore'
+	    ],
+	    styles: [
+	        ' .conversationListHeaderComponent { ',
+	        '   padding-left: 15px; ',
+	        '   width:100%; ',
+	        '   height:52px; ',
+	        ' } ',
+	        ' .conversationListHeaderComponent-heading { color:#FFF; font-size: 1.4em; line-height: 1.6em; } '
+	    ]
+	});
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports) {
+
+	function conversationListComponent() {
+	    var self = this;
+	    return self;
+	}
+
+	ngX.Component({
+	    isBootstrapped: true,
+	    selector: "conversation-list",
+	    component: conversationListComponent,
+	    template: [
+	        '<div class="conversationListComponent">',
+	        '   <conversation-list-header></conversation-list-header>',
+	        '   <profile-list></profile-list>',
+	        '</div>'
+	    ],
+	    providers: [
+	    ],
+	    styles: [
+	    ]
+	});
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	function conversationMessagesComponent($location, conversationList, conversationStore, profileActions) {
+	    var self = this;
+
+	    self.conversations = [];
+
+	    self.messages = [];
+
+	    self.storeOnChange = function () {
+
+	    }
+
+
+
+	    return self;
+	}
+
+	ngX.Component({
+	    isBootstrapped: true,
+	    selector: "conversation-messages",
+	    component: conversationMessagesComponent,
+	    template: [
+	        '<div class="conversationMessagesComponent">',
+	        '   <h1>message list</h1>',
+	        '</div>'
+	    ],
+	    providers: [
+	        '$location',
+	        'conversationList',
+	        'conversationStore',
+	        'profileActions'
+	    ],
+	    styles: [
+	        ' .conversationMessagesComponent { ',
+	        '   height:100%; ',
+	        '   float:left; ',
+	        '   width:auto; ',
+	        '   padding-left: 15px;',
+	        ' } ',
+	    ]
+	});
+
+
+/***/ },
+/* 13 */
 /***/ function(module, exports) {
 
 	function conversationComponent() {
@@ -274,12 +504,20 @@
 	}
 
 	conversationComponent.canActivate = function () {
-	    return ["$q","invokeAsync","profileActions",
-	        function ($q, invokeAsync, profileActions) {
-	            return $q.all([
-	                invokeAsync(profileActions.getCurrentProfile),
-	                invokeAsync(profileActions.getOtherProfiles)
-	            ]);
+	    return ["$q", "$route", "invokeAsync","profileActions",
+	        function ($q, $route, invokeAsync, profileActions) {
+	            var promises = [];
+	            var deferred = $q.defer();
+	            if ($route.current.params.profileId)
+	                promises.push(invokeAsync({
+	                    action: profileActions.getOtherProfile,
+	                    params: { id: Number($route.current.params.profileId) }
+	                }));
+
+	            promises.push(invokeAsync(profileActions.getCurrentProfile));
+	            promises.push(invokeAsync(profileActions.getOtherProfiles));
+	            $q.all(promises).then(function () { deferred.resolve() });
+	            return deferred.promise;
 	        }
 	    ]
 	}
@@ -290,9 +528,13 @@
 	    component: conversationComponent,
 	    template: [
 	        '<div class="conversationComponent">',
-	        '<div class="conversationComponent-conversationList"><conversation-list></conversation-list></div>',
-	        '<div class="conversationComponent-messageList"><message-list></message-list></div>',
-	        '<div style="clear:both;"></div>',
+	        '   <div class="conversationComponent-list">',
+	        '       <conversation-list></conversation-list>',
+	        '   </div>',
+	        '   <div class="conversationComponent-detail">',
+	        '       <conversation-detail></conversation-detail>',
+	        '   </div>',
+	        '   <div style="clear:both;"></div>',
 	        '</div>'
 	    ],
 	    styles: [
@@ -300,26 +542,31 @@
 	        '   width: 100%;',
 	        '   height:100vh;',
 	        ' } ',
-	        ' .conversationComponent-conversationList { ',
+	        ' .conversationComponent-list { ',
 	        '   background-color: rgb(77,57,75); ',
-	        '   postion:relative; float:left;',
-	        '   min-height: 100%; ',
+	        '   float:left;',
+	        '   height: 100%; ',
 	        '   color: #CCC; ',
 	        '   width:225px; ',
 	        ' } ',
-	        ' .conversationComponent-messageList { ',
-	        '   postion:relative; float:left;',
+	        ' .conversationComponent-detail { ',
+	        '   overflow:hidden;',
+	        '   height: 100%;',
+	        '   width:auto; ',
 	        ' } ',
 	    ]
 	});
 
 
 /***/ },
-/* 8 */
+/* 14 */
 /***/ function(module, exports) {
 
 	function loginComponent($location, invokeAsync, profileActions, securityStore) {
 	    var self = this;
+
+	    self.username = 'kobe';
+	    self.password = 'password';
 
 	    self.login = function () {
 	        invokeAsync({
@@ -359,7 +606,55 @@
 
 
 /***/ },
-/* 9 */
+/* 15 */
+/***/ function(module, exports) {
+
+	
+	function profileListComponent(profileStore) {
+	    var self = this;
+	    self.others = profileStore.otherProfiles;
+	    self.other = profileStore.other;
+	    self.isConversatingWith = function (profile) {
+	        return self.other && self.other.username === profile.username;
+	    }
+	    return self;
+	}
+
+	ngX.Component({
+	    isBootstrapped: true,
+	    selector: "profile-list",
+	    component: profileListComponent,
+	    template: [
+	        '   <div class="profileList">',
+	        '       <h2 class="profileList-heading">DIRECT MESSAGES</h2>',
+	        '       <div data-ng-repeat="profile in vm.others">',
+	        '           <a data-ng-if="!vm.isConversatingWith(profile)" class="profileList-otherProfile" href="#/conversation/{{ ::profile.id }}">{{ ::profile.username }}</a>',
+	        '           <a data-ng-if="vm.isConversatingWith(profile)" class="profileList-conversatingWithProfile" href="#/conversation/{{ ::profile.id }}">{{ ::profile.username }}</a>',
+	        '       </div>',
+	        '   </div>'
+	    ],
+	    providers: [
+	        'profileStore'
+	    ],
+	    styles: [
+	        ' .profileList { ',
+	        '   padding-left:15px; ',
+	        ' } ',
+	        ' .profileList-heading { ',
+	        '   font-size: 1.2em; font-weight:400;',
+	        ' } ',
+	        ' .profileList-otherProfile { ',
+	        '   color:#CCC; text-decoration:none;',
+	        ' } ',
+	        ' .profileList-conversatingWithProfile { color: #FFF; text-decoration:none; } '
+	    ]
+	});
+
+
+
+
+/***/ },
+/* 16 */
 /***/ function(module, exports) {
 
 	function registrationComponent($location, profileActions) {
@@ -399,93 +694,7 @@
 
 
 /***/ },
-/* 10 */
-/***/ function(module, exports) {
-
-	function conversationListComponent($location, profileActions, profileStore) {
-	    var self = this;
-	    self.current = profileStore.current;
-	    self.others = profileStore.otherProfiles;
-	    return self;
-	}
-
-	ngX.Component({
-	    isBootstrapped: true,
-	    selector: "conversation-list",
-	    component: conversationListComponent,
-	    template: [
-	        '<div class="conversationListComponent">',
-	        '   <h1>slack</h1>',
-	        '   <span>{{ ::vm.current.username }}</span>',
-	        '   <div>',
-	        '       <h2>DIRECT MESSAGES</h2>',
-	        '       <div data-ng-repeat="profile in vm.others">',
-	        '           <a class="conversationListComponent-otherProfile" href="#/conversation/{{ ::profile.id }}">{{ ::profile.username }}</a>',
-	        '       </div>',
-	        '   </div>',
-	        '</div>'
-	    ],
-	    providers: [
-	        '$location',
-	        'profileActions',
-	        'profileStore'
-	    ],
-	    styles: [
-	        ' .conversationListComponent { ',
-	        '   padding-left:15px; ',
-	        ' } ',
-	        ' .conversationListComponent h1 { ',
-	        '   color: #FFF; ',
-	        ' } ',
-	        ' .conversationListComponent h2 { font-size: 1.2em; font-weight:400; } ',
-	        ' .conversationListComponent-otherProfile { color:#CCC; text-decoration:none; } ',
-	    ]
-	});
-
-
-/***/ },
-/* 11 */
-/***/ function(module, exports) {
-
-	function messageListComponent($location, conversationList, conversationStore, profileActions) {
-	    var self = this;
-
-	    self.conversations = [];
-
-	    self.messages = [];
-
-	    self.storeOnChange = function () {
-
-	    }
-
-	    return self;
-	}
-
-	ngX.Component({
-	    isBootstrapped: true,
-	    selector: "message-list",
-	    component: messageListComponent,
-	    template: [
-	        '<div class="messageListComponent">',
-	        '   <h1>no conversations</h1>',
-	        '</div>'
-	    ],
-	    providers: [
-	        '$location',
-	        'conversationList',
-	        'conversationStore',
-	        'profileActions'
-	    ],
-	    styles: [
-	        ' .messageListComponent { ',
-	        '   padding-left:15px; ',
-	        ' } ',
-	    ]
-	});
-
-
-/***/ },
-/* 12 */
+/* 17 */
 /***/ function(module, exports) {
 
 	function conversation() {
@@ -497,7 +706,7 @@
 	angular.module("app").service("conversation", conversation);
 
 /***/ },
-/* 13 */
+/* 18 */
 /***/ function(module, exports) {
 
 	function conversationList($injector) {
@@ -520,7 +729,7 @@
 	angular.module("app").service("conversationList", ["$injector",conversationList]);
 
 /***/ },
-/* 14 */
+/* 19 */
 /***/ function(module, exports) {
 
 	function message() {
@@ -532,7 +741,7 @@
 	angular.module("app").service("message", message);
 
 /***/ },
-/* 15 */
+/* 20 */
 /***/ function(module, exports) {
 
 	function profile() {
@@ -544,7 +753,7 @@
 	angular.module("app").service("profile", profile);
 
 /***/ },
-/* 16 */
+/* 21 */
 /***/ function(module, exports) {
 
 	function conversationService($q, apiEndpoint, fetch) {
@@ -556,7 +765,7 @@
 	angular.module("app").service("conversationService", ["$q", "apiEndpoint", "fetch", conversationService]);
 
 /***/ },
-/* 17 */
+/* 22 */
 /***/ function(module, exports) {
 
 	function messageService($q, apiEndpoint, fetch) {
@@ -568,7 +777,7 @@
 	angular.module("app").service("messageService", ["$q", "apiEndpoint", "fetch", messageService]);
 
 /***/ },
-/* 18 */
+/* 23 */
 /***/ function(module, exports) {
 
 	function profileService($q, apiEndpoint, fetch, formEncode) {
@@ -611,6 +820,14 @@
 	        return deferred.promise;
 	    };
 
+	    self.getProfileById = function (options) {
+	        var deferred = self.$q.defer();
+	        fetch.fromService({ method: "GET", url: self.baseUri + "/getProfileById", params: { id: options.id} }).then(function (results) {
+	            deferred.resolve(results.data);
+	        });
+	        return deferred.promise;
+	    };
+
 	    self.baseUri = apiEndpoint.getBaseUrl() + "/profile";
 
 	    return self;
@@ -619,7 +836,7 @@
 	angular.module("app").service("profileService", ["$q", "apiEndpoint", "fetch", "formEncode", profileService]);
 
 /***/ },
-/* 19 */
+/* 24 */
 /***/ function(module, exports) {
 
 	function conversationStore($, dispatcher, CONVERSATION_ACTIONS) {
@@ -642,7 +859,7 @@
 	ngX.Store({ store: conversationStore, providers: ["$","dispatcher", "CONVERSATION_ACTIONS"] });
 
 /***/ },
-/* 20 */
+/* 25 */
 /***/ function(module, exports) {
 
 	function messageStore($, dispatcher, MESSAGE_ACTIONS) {
@@ -657,7 +874,7 @@
 	ngX.Store({ store: messageStore, providers: ["$","dispatcher", "MESSAGE_ACTIONS"] });
 
 /***/ },
-/* 21 */
+/* 26 */
 /***/ function(module, exports) {
 
 	function profileStore(dispatcher, PROFILE_ACTIONS) {
@@ -681,6 +898,14 @@
 	            self.storeInstance.emitChange({ id: options.id });
 	        }
 	    });
+
+	    dispatcher.addListener({
+	        actionType: PROFILE_ACTIONS.OTHER,
+	        callback: function (options) {
+	            self.other = options.data;
+	            self.storeInstance.emitChange({ id: options.id });
+	        }
+	    });
 	    
 	    return self;
 	}
@@ -688,7 +913,7 @@
 	ngX.Store({ store: profileStore, providers: ["dispatcher", "PROFILE_ACTIONS"] });
 
 /***/ },
-/* 22 */
+/* 27 */
 /***/ function(module, exports) {
 
 	function securityStore(dispatcher, localStorageManager, PROFILE_ACTIONS) {
