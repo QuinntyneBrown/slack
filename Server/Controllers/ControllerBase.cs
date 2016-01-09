@@ -1,5 +1,6 @@
 ﻿using Slack.Data.Contracts;
 using System.Web.Http;
+using System.Net.Http;
 
 namespace Slack.Controllers
 {
@@ -9,6 +10,8 @@ namespace Slack.Controllers
         {
             this.uow = uow;
         }
+
+        public string Username { get { return Request.GetRequestContext().Principal.Identity.Name; } }
 
         protected readonly ISlackUow uow;
     }

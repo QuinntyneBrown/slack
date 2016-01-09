@@ -32,7 +32,7 @@ namespace Slack.Controllers
         public IHttpActionResult GetCurrentProfile()
             => Ok(new ProfileDto(uow.Profiles.GetAll()
                 .ToList()
-                .Where(x=> x.Username == Request.GetRequestContext().Principal.Identity.Name)
+                .Where(x=> x.Username == Username)
                 .Single()));
 
         [HttpGet]
@@ -41,7 +41,7 @@ namespace Slack.Controllers
         public IHttpActionResult GetOtherProfiles()
             => Ok(uow.Profiles.GetAll()
                 .ToList()
-                .Where(x => x.Username != Request.GetRequestContext().Principal.Identity.Name)
+                .Where(x => x.Username != Username)
                 .ToList()
                 .Select(x=> new ProfileDto(x)));
 

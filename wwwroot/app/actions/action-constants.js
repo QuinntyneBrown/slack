@@ -7,7 +7,8 @@
 });
 
 angular.module("app").value("CONVERSATION_ACTIONS", {
-
+    GET_BY_CURRENT_PROFILE: 6,
+    CURRENT: 7
 });
 
 angular.module("app").value("MESSAGE_ACTIONS", {

@@ -102,7 +102,8 @@
 	});
 
 	angular.module("app").value("CONVERSATION_ACTIONS", {
-
+	    GET_BY_CURRENT_PROFILE: 6,
+	    CURRENT: 7
 	});
 
 	angular.module("app").value("MESSAGE_ACTIONS", {
@@ -113,7 +114,28 @@
 /* 4 */
 /***/ function(module, exports) {
 
-	
+	function conversationActions(dispatcher, formEncode, guid, conversationService, CONVERSATION_ACTIONS) {
+	    var self = this;
+
+	    self.getByCurrentProfile = function () {
+	        var newGuid = guid();
+
+	        profileService.getByCurrentProfile().then(function (results) {
+	            dispatcher.emit({
+	                actionType: PROFILE_ACTIONS.GET_BY_CURRENT_PROFILE, options:
+	                    { data: results, id: newGuid }
+	            });
+	        });
+	        return newGuid;
+	    }
+
+	    return self;
+	}
+
+	angular.module("app")
+	    .service("conversationActions", ["dispatcher", "formEncode", "guid", "conversationService", "CONVERSATION_ACTIONS", conversationActions])
+
+
 
 /***/ },
 /* 5 */
@@ -425,8 +447,16 @@
 /* 11 */
 /***/ function(module, exports) {
 
-	function messageListComponent($location, profileActions) {
+	function messageListComponent($location, conversationList, conversationStore, profileActions) {
 	    var self = this;
+
+	    self.conversations = [];
+
+	    self.messages = [];
+
+	    self.storeOnChange = function () {
+
+	    }
 
 	    return self;
 	}
@@ -442,6 +472,8 @@
 	    ],
 	    providers: [
 	        '$location',
+	        'conversationList',
+	        'conversationStore',
 	        'profileActions'
 	    ],
 	    styles: [
@@ -595,6 +627,14 @@
 
 	    self.connection = $.hubConnection();
 	    self.hub = self.connection.createHubProxy("conversationHub");
+
+	    dispatcher.addListener({
+	        actionType: CONVERSATION_ACTIONS.GET_BY_CURRENT_PROFILE,
+	        callback: function (options) {
+	            self.byProfile = options.data;
+	            self.storeInstance.emitChange({ id: options.id });
+	        }
+	    });
 
 	    return self;
 	}
