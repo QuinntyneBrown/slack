@@ -1,24 +1,18 @@
 ﻿using Slack.Data.Contracts;
 using Slack.Dtos;
 using Slack.Services.Contracts;
-using System.Data.Entity;
 using System.Linq;
 using System.Web.Http;
-using System.Net.Http;
-
 
 namespace Slack.Controllers
 {
     [Authorize]
     [RoutePrefix("api/profile")]
     public class ProfileController : ControllerBase
-    {
-       
+    {       
         public ProfileController(ISlackUow uow, IIdentityService identityService)
             :base(uow)
-        {
-            this.identityService = identityService;
-        }
+        { this.identityService = identityService; }
         
         [HttpPost]
         [AllowAnonymous]
@@ -31,7 +25,6 @@ namespace Slack.Controllers
         [Route("getCurrentProfile")]
         public IHttpActionResult GetCurrentProfile()
             => Ok(new ProfileDto(uow.Profiles.GetAll()
-                .ToList()
                 .Where(x=> x.Username == Username)
                 .Single()));
 
@@ -40,7 +33,6 @@ namespace Slack.Controllers
         [Route("getOtherProfiles")]
         public IHttpActionResult GetOtherProfiles()
             => Ok(uow.Profiles.GetAll()
-                .ToList()
                 .Where(x => x.Username != Username)
                 .ToList()
                 .Select(x=> new ProfileDto(x)));

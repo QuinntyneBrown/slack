@@ -8,14 +8,8 @@ namespace Slack.Controllers
     public class MessageController : ControllerBase
     {
         public MessageController(ISlackUow uow)
-        :base(uow)
-        {
+        :base(uow) { }
 
-        }
-
-        public IHttpActionResult Send()
-        {
-            return Ok();
-        }
+        public IHttpActionResult Send() => Ok();
     }
 }

@@ -12,10 +12,7 @@ namespace Slack.Services
 {
     public class IdentityService : IIdentityService
     {
-        public IdentityService(ISlackUow uow)
-        {
-            this.uow = uow;
-        }
+        public IdentityService(ISlackUow uow) { this.uow = uow; }
 
         public bool AuthenticateUser(string username, string password)
         {
@@ -27,10 +24,8 @@ namespace Slack.Services
 
         public ICollection<Claim> GetClaimsForUser(string username)
         {
-            var claims = new List<Claim>();
-            
-            claims.Add(new Claim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name", username));
-            
+            var claims = new List<Claim>();            
+            claims.Add(new Claim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name", username));            
             return claims;
         }
         

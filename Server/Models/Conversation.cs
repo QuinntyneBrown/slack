@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Collections.Generic;
 
 namespace Slack.Models
 {
     public class Conversation
     {
-
         public Conversation()
         {
             this.Profiles = new HashSet<Profile>();
@@ -16,10 +12,7 @@ namespace Slack.Models
 
         public int Id { get; set; }
         public ICollection<Profile> Profiles { get; set; }
-
         public ICollection<Message> Messages { get; set; }
-
-
-        
+   
     }
 }

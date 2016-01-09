@@ -11,10 +11,7 @@ namespace Slack.Controllers
     public class ConversationController : ControllerBase
     {
         public ConversationController(ISlackUow uow)
-            :base(uow)
-        {
-
-        }
+            :base(uow) { }
 
         [HttpGet]
         [Route("getByCurrentProfile")]
