@@ -9,7 +9,7 @@ namespace Slack.Auth
 {
     public class OAuthOptions : OAuthAuthorizationServerOptions
     {
-        public OAuthOptions(Slack.Services.Contracts.IIdentityService identityService)
+        public OAuthOptions(IIdentityService identityService)
         {
             var config = AppConfiguration.Config;
 

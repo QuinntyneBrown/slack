@@ -1,10 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Web.Http;
-using Microsoft.Owin;
+﻿using Microsoft.Owin;
 using Owin;
+using System.Web.Http;
 using Unity.WebApi;
-using Slack.Server;
 
 [assembly: OwinStartup(typeof(Slack.Startup))]
 

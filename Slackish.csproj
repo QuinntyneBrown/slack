@@ -192,7 +192,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Global.asax" />
     <Content Include="gulpfile.js" />
     <Content Include="index.html" />
     <Content Include="lib\angular-route.js" />
@@ -270,9 +269,6 @@
     <Compile Include="Server\Dtos\RegistrationRequestDto.cs" />
     <Compile Include="Server\Dtos\SignInDto.cs" />
     <Compile Include="Server\Dtos\TokenDto.cs" />
-    <Compile Include="Global.asax.cs">
-      <DependentUpon>Global.asax</DependentUpon>
-    </Compile>
     <Compile Include="Server\Hubs\ConversationHub.cs" />
     <Compile Include="Server\Hubs\MessageHub.cs" />
     <Compile Include="Server\Hubs\ProfileHub.cs" />
