@@ -5,6 +5,7 @@ require('./app/metal/jQuery.js');
 require('./app/actions/action-constants.js');
 require('./app/actions/conversation-actions.js');
 require('./app/actions/profile-actions.js');
+require('./app/actions/messageActions.js');
 
 require('./app/components/about-conversation.js');
 require('./app/components/app.js');
@@ -17,6 +18,7 @@ require('./app/components/conversation.js');
 require('./app/components/login.js');
 require('./app/components/profile-list.js');
 require('./app/components/registration.js');
+require('./app/components/message-form.js');
 
 require('./app/domain/conversation.js');
 require('./app/domain/conversation-list.js');

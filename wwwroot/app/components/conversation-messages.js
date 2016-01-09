@@ -1,4 +1,4 @@
-﻿function conversationMessagesComponent($location, conversationList, conversationStore, profileActions) {
+﻿function conversationMessagesComponent($location, conversationList, conversationStore, messageStore, profileActions) {
     var self = this;
 
     self.conversations = [];
@@ -6,10 +6,8 @@
     self.messages = [];
 
     self.storeOnChange = function () {
-
+        alert(messageStore.items.length);
     }
-
-
 
     return self;
 }
@@ -20,13 +18,14 @@ ngX.Component({
     component: conversationMessagesComponent,
     template: [
         '<div class="conversationMessagesComponent">',
-        '   <h1>message list</h1>',
+        '<message-form></message-form>',
         '</div>'
     ],
     providers: [
         '$location',
         'conversationList',
         'conversationStore',
+        'messageStore',
         'profileActions'
     ],
     styles: [

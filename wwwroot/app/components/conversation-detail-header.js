@@ -24,6 +24,7 @@ ngX.Component({
         '   padding-left: 15px; ',
         '   width:100%; ',
         '   height:52px; ',
+        '   background-color: rgb(250,250,250); ',
         ' } '
     ]
 });

@@ -51,32 +51,34 @@
 	__webpack_require__(3);
 	__webpack_require__(4);
 	__webpack_require__(5);
-
 	__webpack_require__(6);
+
 	__webpack_require__(7);
-	__webpack_require__(8)
+	__webpack_require__(8);
 	__webpack_require__(9)
 	__webpack_require__(10)
-	__webpack_require__(11);
+	__webpack_require__(11)
 	__webpack_require__(12);
 	__webpack_require__(13);
 	__webpack_require__(14);
 	__webpack_require__(15);
 	__webpack_require__(16);
-
 	__webpack_require__(17);
 	__webpack_require__(18);
+
 	__webpack_require__(19);
 	__webpack_require__(20);
-
 	__webpack_require__(21);
 	__webpack_require__(22);
-	__webpack_require__(23);
 
+	__webpack_require__(23);
 	__webpack_require__(24);
 	__webpack_require__(25);
+
 	__webpack_require__(26);
 	__webpack_require__(27);
+	__webpack_require__(28);
+	__webpack_require__(29);
 
 /***/ },
 /* 1 */
@@ -113,7 +115,7 @@
 	});
 
 	angular.module("app").value("MESSAGE_ACTIONS", {
-
+	    SEND: 9
 	});
 
 /***/ },
@@ -240,6 +242,35 @@
 /* 6 */
 /***/ function(module, exports) {
 
+	function messageActions(dispatcher, formEncode, guid, messageService, MESSAGE_ACTIONS) {
+	    var self = this;
+
+	    self.send = function (options) {
+	        var newGuid = guid();
+
+	        messageService.send({ content: options.content, otherProfileId: options.otherProfileId })
+	            .then(function (results) {
+
+	            dispatcher.emit({
+	                actionType: MESSAGE_ACTIONS.SEND, options:
+	                    { data: results, id: newGuid }
+	            });
+	        });
+	        return newGuid;
+	    }
+
+	    return self;
+	}
+
+	angular.module("app")
+	    .service("messageActions", ["dispatcher", "formEncode", "guid", "messageService", "MESSAGE_ACTIONS", messageActions])
+
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
 	function aboutConversationComponent(profileStore) {
 	    var self = this;
 	    self.other = profileStore.other;
@@ -270,7 +301,7 @@
 
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports) {
 
 	function appComponent() {
@@ -317,7 +348,7 @@
 	}]);
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports) {
 
 	function conversationDetailHeaderComponent(profileStore) {
@@ -346,13 +377,14 @@
 	        '   padding-left: 15px; ',
 	        '   width:100%; ',
 	        '   height:52px; ',
+	        '   background-color: rgb(250,250,250); ',
 	        ' } '
 	    ]
 	});
 
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports) {
 
 	function conversationDetailComponent(profileStore) {
@@ -387,7 +419,7 @@
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports) {
 
 	function conversationListHeaderComponent(profileStore) {
@@ -423,7 +455,7 @@
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports) {
 
 	function conversationListComponent() {
@@ -449,10 +481,10 @@
 
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports) {
 
-	function conversationMessagesComponent($location, conversationList, conversationStore, profileActions) {
+	function conversationMessagesComponent($location, conversationList, conversationStore, messageStore, profileActions) {
 	    var self = this;
 
 	    self.conversations = [];
@@ -460,10 +492,8 @@
 	    self.messages = [];
 
 	    self.storeOnChange = function () {
-
+	        alert(messageStore.items.length);
 	    }
-
-
 
 	    return self;
 	}
@@ -474,13 +504,14 @@
 	    component: conversationMessagesComponent,
 	    template: [
 	        '<div class="conversationMessagesComponent">',
-	        '   <h1>message list</h1>',
+	        '<message-form></message-form>',
 	        '</div>'
 	    ],
 	    providers: [
 	        '$location',
 	        'conversationList',
 	        'conversationStore',
+	        'messageStore',
 	        'profileActions'
 	    ],
 	    styles: [
@@ -495,7 +526,7 @@
 
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports) {
 
 	function conversationComponent() {
@@ -559,7 +590,7 @@
 
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports) {
 
 	function loginComponent($location, invokeAsync, profileActions, securityStore) {
@@ -606,7 +637,7 @@
 
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports) {
 
 	
@@ -654,7 +685,7 @@
 
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports) {
 
 	function registrationComponent($location, profileActions) {
@@ -694,7 +725,50 @@
 
 
 /***/ },
-/* 17 */
+/* 18 */
+/***/ function(module, exports) {
+
+	function messsageFormComponent(messageActions, profileStore) {
+
+	    var self = this;
+
+	    self.send = function () {
+	        messageActions.send({
+	            content: self.content,
+	            otherProfileId: profileStore.other.id
+	        });
+
+	        self.content = null;
+	    }
+
+	    return self;
+	}
+
+	ngX.Component({
+	    isBootstrapped: true,
+	    selector: "message-form",
+	    component: messsageFormComponent,
+	    template: [
+	        '<div class="message-form" style="width:100%">',
+	        '   <input class="message-form-input" placeholder="Type a message..." data-ng-model="vm.content"></input>',
+	        '   <button class="message-form-button" data-ng-click="vm.send()">Send</button>',
+	        '</div>'
+	    ],
+	    styles: [
+	        ' .message-form-input { ',
+	        '   width:400px; line-height:1.5em; font-size:1.2em; padding:10px; ',
+	        ' } ',
+	        ' .message-form-button { ',
+	        '   height:40px; margin:0;',
+	        ' } ',
+	    ],
+	    providers: [
+	        'messageActions', 'profileStore'
+	    ]
+	});
+
+/***/ },
+/* 19 */
 /***/ function(module, exports) {
 
 	function conversation() {
@@ -706,7 +780,7 @@
 	angular.module("app").service("conversation", conversation);
 
 /***/ },
-/* 18 */
+/* 20 */
 /***/ function(module, exports) {
 
 	function conversationList($injector) {
@@ -729,7 +803,7 @@
 	angular.module("app").service("conversationList", ["$injector",conversationList]);
 
 /***/ },
-/* 19 */
+/* 21 */
 /***/ function(module, exports) {
 
 	function message() {
@@ -741,7 +815,7 @@
 	angular.module("app").service("message", message);
 
 /***/ },
-/* 20 */
+/* 22 */
 /***/ function(module, exports) {
 
 	function profile() {
@@ -753,7 +827,7 @@
 	angular.module("app").service("profile", profile);
 
 /***/ },
-/* 21 */
+/* 23 */
 /***/ function(module, exports) {
 
 	function conversationService($q, apiEndpoint, fetch) {
@@ -765,19 +839,33 @@
 	angular.module("app").service("conversationService", ["$q", "apiEndpoint", "fetch", conversationService]);
 
 /***/ },
-/* 22 */
+/* 24 */
 /***/ function(module, exports) {
 
 	function messageService($q, apiEndpoint, fetch) {
 	    var self = this;
 
+	    self.send = function (options) {
+	        var deferred = $q.defer();
+	        fetch.fromService({
+	            method: "POST", url: self.baseUri + "/send", data:
+	                {
+	                    content: options.content,
+	                    otherProfileId: options.otherProfileId
+	                }
+	        }).then(function (results) {
+	            deferred.resolve(results.data);
+	        });
+	        return deferred.promise;
+	    };
 
+	    self.baseUri = apiEndpoint.getBaseUrl() + "/message";
 	}
 
 	angular.module("app").service("messageService", ["$q", "apiEndpoint", "fetch", messageService]);
 
 /***/ },
-/* 23 */
+/* 25 */
 /***/ function(module, exports) {
 
 	function profileService($q, apiEndpoint, fetch, formEncode) {
@@ -836,7 +924,7 @@
 	angular.module("app").service("profileService", ["$q", "apiEndpoint", "fetch", "formEncode", profileService]);
 
 /***/ },
-/* 24 */
+/* 26 */
 /***/ function(module, exports) {
 
 	function conversationStore($, dispatcher, CONVERSATION_ACTIONS) {
@@ -859,7 +947,7 @@
 	ngX.Store({ store: conversationStore, providers: ["$","dispatcher", "CONVERSATION_ACTIONS"] });
 
 /***/ },
-/* 25 */
+/* 27 */
 /***/ function(module, exports) {
 
 	function messageStore($, dispatcher, MESSAGE_ACTIONS) {
@@ -868,13 +956,21 @@
 	    self.connection = $.hubConnection();
 	    self.hub = self.connection.createHubProxy("messageHub");
 
+	    dispatcher.addListener({
+	        actionType: MESSAGE_ACTIONS.SEND,
+	        callback: function (options) {
+	            self.storeInstance.addOrUpdate({ data: options.data });
+	            self.storeInstance.emitChange({ id: options.id });
+	        }
+	    });
+
 	    return self;
 	}
 
 	ngX.Store({ store: messageStore, providers: ["$","dispatcher", "MESSAGE_ACTIONS"] });
 
 /***/ },
-/* 26 */
+/* 28 */
 /***/ function(module, exports) {
 
 	function profileStore(dispatcher, PROFILE_ACTIONS) {
@@ -913,7 +1009,7 @@
 	ngX.Store({ store: profileStore, providers: ["dispatcher", "PROFILE_ACTIONS"] });
 
 /***/ },
-/* 27 */
+/* 29 */
 /***/ function(module, exports) {
 
 	function securityStore(dispatcher, localStorageManager, PROFILE_ACTIONS) {

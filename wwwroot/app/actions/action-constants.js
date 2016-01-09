@@ -13,5 +13,5 @@ angular.module("app").value("CONVERSATION_ACTIONS", {
 });
 
 angular.module("app").value("MESSAGE_ACTIONS", {
-
+    SEND: 9
 });

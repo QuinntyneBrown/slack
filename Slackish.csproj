@@ -205,6 +205,7 @@
     <Content Include="Web.config" />
     <Content Include="wwwroot\app\actions\action-constants.js" />
     <Content Include="wwwroot\app\actions\conversation-actions.js" />
+    <Content Include="wwwroot\app\actions\messageActions.js" />
     <Content Include="wwwroot\app\actions\profile-actions.js" />
     <Content Include="wwwroot\app\app.module.js" />
     <Content Include="wwwroot\app\components\about-conversation.js" />
@@ -226,6 +227,9 @@
     </Content>
     <Content Include="wwwroot\app\components\conversation.js" />
     <Content Include="wwwroot\app\components\login.js" />
+    <Content Include="wwwroot\app\components\message-form.js">
+      <DependentUpon>conversation-messages.js</DependentUpon>
+    </Content>
     <Content Include="wwwroot\app\components\profile-list.js">
       <DependentUpon>conversation-list.js</DependentUpon>
     </Content>
@@ -267,6 +271,7 @@
     <Compile Include="Server\Dtos\MessageDto.cs" />
     <Compile Include="Server\Dtos\ProfileDto.cs" />
     <Compile Include="Server\Dtos\RegistrationRequestDto.cs" />
+    <Compile Include="Server\Dtos\SendMessageRequestDto.cs" />
     <Compile Include="Server\Dtos\SignInDto.cs" />
     <Compile Include="Server\Dtos\TokenDto.cs" />
     <Compile Include="Server\Hubs\ConversationHub.cs" />

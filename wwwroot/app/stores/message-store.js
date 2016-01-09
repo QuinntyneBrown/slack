@@ -4,6 +4,14 @@
     self.connection = $.hubConnection();
     self.hub = self.connection.createHubProxy("messageHub");
 
+    dispatcher.addListener({
+        actionType: MESSAGE_ACTIONS.SEND,
+        callback: function (options) {
+            self.storeInstance.addOrUpdate({ data: options.data });
+            self.storeInstance.emitChange({ id: options.id });
+        }
+    });
+
     return self;
 }
 
