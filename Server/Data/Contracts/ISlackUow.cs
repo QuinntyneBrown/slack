@@ -15,5 +15,7 @@ namespace Slack.Data.Contracts
         IRepository<Message> Messages { get; }
 
         IRepository<Conversation> Conversations { get; }
+
+        void SaveChanges();
     }
 }

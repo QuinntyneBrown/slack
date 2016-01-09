@@ -25,6 +25,10 @@ angular.module("app").config(['$routeProvider', function ($routeProvider) {
         "componentName": "loginComponent"
     });
 
+    $routeProvider.when("/register", {
+        "componentName": "registrationComponent"
+    });
+
     $routeProvider.when("/conversation", {
         "componentName": "conversationComponent"
     });

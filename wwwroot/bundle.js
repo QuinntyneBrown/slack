@@ -47,40 +47,55 @@
 	__webpack_require__(1);
 
 	__webpack_require__(2);
+
 	__webpack_require__(3);
 	__webpack_require__(4);
-
 	__webpack_require__(5);
+
 	__webpack_require__(6);
 	__webpack_require__(7);
 	__webpack_require__(8);
 	__webpack_require__(9);
-
 	__webpack_require__(10);
 	__webpack_require__(11);
-	__webpack_require__(12);
 
+	__webpack_require__(12);
 	__webpack_require__(13);
 	__webpack_require__(14);
-	__webpack_require__(15);
 
+	__webpack_require__(15);
 	__webpack_require__(16);
 	__webpack_require__(17);
+
 	__webpack_require__(18);
+	__webpack_require__(19);
+	__webpack_require__(20);
+	__webpack_require__(21);
 
 /***/ },
 /* 1 */
 /***/ function(module, exports) {
 
-	angular.module("app", ["ngX"]);
+	angular.module("app", ["ngX"]).config(["apiEndpointProvider", "loginRedirectProvider", function (apiEndpointProvider, loginRedirectProvider) {
+	    apiEndpointProvider.configure("/api");
+	    loginRedirectProvider.setDefaultUrl("/myprofile");
+	}]);
 
 
 /***/ },
 /* 2 */
 /***/ function(module, exports) {
 
+	angular.module("app").value("$", $);
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
 	angular.module("app").value("PROFILE_ACTIONS", {
-	    LOGIN: 0
+	    LOGIN: 0,
+	    LOGIN_FAIL: 1,
+	    REGISTER: 3
 	});
 
 	angular.module("app").value("CONVERSATION_ACTIONS", {
@@ -92,22 +107,56 @@
 	});
 
 /***/ },
-/* 3 */
+/* 4 */
 /***/ function(module, exports) {
 
 	
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports) {
 
-	function profileActions(dispatcher, guid, PROFILE_ACTIONS) {
+	function profileActions(dispatcher, formEncode, guid, profileService, PROFILE_ACTIONS) {
 	    var self = this;
 	    self.login = function (options) {
 	        var newGuid = guid();
-	        dispatcher.emit({
-	            actionType: PROFILE_ACTIONS.LOGIN,
-	            options: { data: { username: options.username } }
+	        profileService.tryToLogin({
+	            data: {
+	                username: options.username,
+	                password: options.password
+	            }
+	        }).then(function (results) {
+	            if (results.access_token) {
+	                dispatcher.emit({
+	                    actionType: PROFILE_ACTIONS.LOGIN, options: {
+	                        token: results.access_token,
+	                        id: newGuid
+	                    }
+	                });
+	            } else {
+	                dispatcher.emit({
+	                    actionType: PROFILE_ACTIONS.LOGIN_FAIL, options: {
+	                        id: newGuid
+	                    }
+	                });
+	            }
+
+	        });
+	        return newGuid;
+	    };
+
+
+	    self.register = function (options) {
+	        var newGuid = guid();
+
+	        profileService.tryToRegister({
+	            username: options.username,
+	            password: options.password,
+	        }).then(function (results) {
+	            dispatcher.emit({
+	                actionType: PROFILE_ACTIONS.REGISTER, options:
+	                    { data: results, id: newGuid }
+	            });
 	        });
 	        return newGuid;
 	    }
@@ -116,12 +165,12 @@
 	}
 
 	angular.module("app")
-	    .service("profileActions", ["dispatcher", "guid","PROFILE_ACTIONS", profileActions])
+	    .service("profileActions", ["dispatcher", "formEncode", "guid", "profileService", "PROFILE_ACTIONS", profileActions])
 
 
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports) {
 
 	function appComponent() {
@@ -151,6 +200,10 @@
 	        "componentName": "loginComponent"
 	    });
 
+	    $routeProvider.when("/register", {
+	        "componentName": "registrationComponent"
+	    });
+
 	    $routeProvider.when("/conversation", {
 	        "componentName": "conversationComponent"
 	    });
@@ -158,7 +211,7 @@
 	}]);
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports) {
 
 	function conversationComponent(profileStore, conversationStore) {
@@ -201,18 +254,23 @@
 
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports) {
 
-	function loginComponent($location, profileActions) {
+	function loginComponent($location, invokeAsync, profileActions, securityStore) {
 	    var self = this;
 
 	    self.login = function () {
-	        profileActions.login({ username: self.username });
-	    }
-
-	    self.storeOnChange = function () {
-	        $location.path('/conversation');
+	        invokeAsync({
+	            action: profileActions.login,
+	            params: {
+	                username: self.username,
+	                password: self.password
+	            }
+	        }).then(function () {
+	            if(securityStore.token)
+	                $location.path('/conversation');
+	        });
 	    }
 
 	    return self;
@@ -224,8 +282,52 @@
 	    template: [
 	        '<div>',
 	        '<div><h1>Login</h1></div>',
-	        '<input placeholder="Username" data-ng-model="vm.username"></input>',
+	        '<div><input placeholder="Username" data-ng-model="vm.username"></input></div>',
+	        '<div><input placeholder="Password" type="password" data-ng-model="vm.password"></input></div>',
 	        '<button data-ng-click="vm.login()">login</button>',
+	        '<div><a href="#/register">Register</a></div>',
+	        '</div>'
+	    ],
+	    providers: [
+	        '$location',
+	        'invokeAsync',
+	        'profileActions',
+	        'securityStore'
+	    ]
+	});
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	function registrationComponent($location, profileActions) {
+	    var self = this;
+
+	    self.register = function () {
+
+	        profileActions.register({
+	            username: self.username,
+	            password: self.password
+	        });
+	    }
+
+	    self.storeOnChange = function () {
+	        $location.path('/conversation');
+	    }
+
+	    return self;
+	}
+
+	ngX.Component({
+	    isBootstrapped: true,
+	    component: registrationComponent,
+	    template: [
+	        '<div>',
+	        '   <div><h1>Register</h1></div>',
+	        '<div><input placeholder="Username" data-ng-model="vm.username"></input></div>',
+	        '<div><input placeholder="Password" type="password" data-ng-model="vm.password"></input></div>',
+	        '   <button data-ng-click="vm.register()">register</button>',
 	        '</div>'
 	    ],
 	    providers: [
@@ -236,7 +338,7 @@
 
 
 /***/ },
-/* 8 */
+/* 10 */
 /***/ function(module, exports) {
 
 	function conversationListComponent($location, profileActions, profileStore) {
@@ -272,7 +374,7 @@
 
 
 /***/ },
-/* 9 */
+/* 11 */
 /***/ function(module, exports) {
 
 	function messageListComponent($location, profileActions) {
@@ -303,18 +405,6 @@
 
 
 /***/ },
-/* 10 */
-/***/ function(module, exports) {
-
-	
-
-/***/ },
-/* 11 */
-/***/ function(module, exports) {
-
-	
-
-/***/ },
 /* 12 */
 /***/ function(module, exports) {
 
@@ -342,44 +432,126 @@
 /* 16 */
 /***/ function(module, exports) {
 
-	function conversationStore() {
-	    var self = this;
-
-	    return self;
-	}
-
-	ngX.Store({ store: conversationStore, providers: ["dispatcher", "CONVERSATION_ACTIONS"] });
+	
 
 /***/ },
 /* 17 */
 /***/ function(module, exports) {
 
-	function messageStore() {
+	function profileService($q, apiEndpoint, fetch, formEncode) {
 	    var self = this;
+	    self.$q = $q;
+	    self.tryToLogin = function (options) {
+	        var deferred = self.$q.defer();
+	        angular.extend(options.data, { grant_type: "password" });
+	        var formEncodedData = formEncode(options.data);
+	        var headers = { "Content-Type": "application/x-www-form-urlencoded" };
+	        fetch.fromService({ method: "POST", url: self.baseUri + "/token", data: formEncodedData, headers: headers }).then(function (results) {
+	            deferred.resolve(results.data);
+	        }).catch(function (error) {
+	            deferred.resolve(error);
+	        });
+	        return deferred.promise;
+	    };
+
+
+	    self.tryToRegister = function (options) {
+	        var deferred = self.$q.defer();
+
+
+
+	        //fetch.fromService({ method: "POST", url: self.baseUri + "/register", data: { username: options.username, password: options.password } }).then(function (results) {
+	        //    deferred.resolve(results.data);
+	        //});
+	        return deferred.promise;
+	    };
+
+	    
+
+	    self.baseUri = apiEndpoint.getBaseUrl() + "/profile";
 
 	    return self;
 	}
 
-	ngX.Store({ store: messageStore, providers: ["dispatcher", "MESSAGE_ACTIONS"] });
+	angular.module("app").service("profileService", ["$q", "apiEndpoint", "fetch", "formEncode", profileService]);
 
 /***/ },
 /* 18 */
 /***/ function(module, exports) {
 
+	function conversationStore($, dispatcher, CONVERSATION_ACTIONS) {
+	    var self = this;
+
+	    self.connection = $.hubConnection();
+	    self.hub = self.connection.createHubProxy("conversationHub");
+
+	    return self;
+	}
+
+	ngX.Store({ store: conversationStore, providers: ["$","dispatcher", "CONVERSATION_ACTIONS"] });
+
+/***/ },
+/* 19 */
+/***/ function(module, exports) {
+
+	function messageStore($, dispatcher, MESSAGE_ACTIONS) {
+	    var self = this;
+
+	    self.connection = $.hubConnection();
+	    self.hub = self.connection.createHubProxy("messageHub");
+
+	    return self;
+	}
+
+	ngX.Store({ store: messageStore, providers: ["$","dispatcher", "MESSAGE_ACTIONS"] });
+
+/***/ },
+/* 20 */
+/***/ function(module, exports) {
+
 	function profileStore(dispatcher, PROFILE_ACTIONS) {
 	    var self = this;
 
-	    dispatcher.addListener({
-	        actionType: PROFILE_ACTIONS.LOGIN,
-	        callback: function (options) {
-	            self.current = options.data;
-	            self.emitChange({ id: options.id });
-	        }
-	    });
+	    self.connection = $.hubConnection();
+	    self.hub = self.connection.createHubProxy("profileHub");
+
 	    return self;
 	}
 
 	ngX.Store({ store: profileStore, providers: ["dispatcher", "PROFILE_ACTIONS"] });
+
+/***/ },
+/* 21 */
+/***/ function(module, exports) {
+
+	function securityStore(dispatcher, localStorageManager, PROFILE_ACTIONS) {
+	    var self = this;
+	    self.localStorageManager = localStorageManager;
+
+	    dispatcher.addListener({
+	        actionType: PROFILE_ACTIONS.LOGIN,
+	        callback: function (options) {
+	            self.token = options.token;
+	            self.emitChange({ id: options.id });
+	        }
+	    });
+
+	    dispatcher.addListener({
+	        actionType: PROFILE_ACTIONS.LOGIN_FAIL,
+	        callback: function (options) {
+	            self.storeInstance.emitChange({ id: options.id });
+	        }
+	    });
+
+	    Object.defineProperty(self, "token", {
+	        get: function () { return self.localStorageManager.get({ name: "token" }); },
+	        set: function (value) { self.localStorageManager.put({ name: "token", value: value }); }
+	    });
+
+	    return self;
+	}
+
+	ngX.Store({ store: securityStore, providers: ["dispatcher", "localStorageManager", "PROFILE_ACTIONS"] });
 
 /***/ }
 /******/ ]);

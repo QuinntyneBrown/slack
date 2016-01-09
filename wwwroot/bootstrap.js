@@ -9,6 +9,7 @@ require('./app/actions/profile-actions.js');
 require('./app/components/app-component.js');
 require('./app/components/conversation-component.js');
 require('./app/components/login-component.js');
+require('./app/components/registration-component.js');
 require('./app/components/conversation-list-component.js');
 require('./app/components/message-list-component.js');
 
@@ -23,3 +24,4 @@ require('./app/services/profile-service.js');
 require('./app/stores/conversation-store.js');
 require('./app/stores/message-store.js');
 require('./app/stores/profile-store.js');
+require('./app/stores/security-store.js');

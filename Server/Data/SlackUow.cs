@@ -21,5 +21,10 @@ namespace Slack.Data
         public IRepository<Message> Messages { get { return GetStandardRepo<Message>(); } }
 
         public IRepository<Conversation> Conversations { get { return GetStandardRepo<Conversation>(); } }
+
+        public void SaveChanges()
+        {
+            base.dbContext.SaveChanges();
+        }
     }
 }
