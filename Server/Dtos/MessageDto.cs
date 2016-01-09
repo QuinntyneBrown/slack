@@ -4,6 +4,11 @@ namespace Slack.Dtos
 {
     public class MessageDto
     {
+        public MessageDto()
+        {
+
+        }
+
         public MessageDto(Message message)
         {
             this.Id = message.Id;

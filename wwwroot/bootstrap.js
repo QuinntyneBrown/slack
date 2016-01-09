@@ -1,11 +1,12 @@
 ﻿require('./app/app.module.js');
 
 require('./app/metal/jQuery.js');
+require('./app/metal/safeDigest.js');
 
 require('./app/actions/action-constants.js');
 require('./app/actions/conversation-actions.js');
 require('./app/actions/profile-actions.js');
-require('./app/actions/messageActions.js');
+require('./app/actions/message-actions.js');
 
 require('./app/components/about-conversation.js');
 require('./app/components/app.js');

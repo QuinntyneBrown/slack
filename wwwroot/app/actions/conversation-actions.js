@@ -10,6 +10,7 @@
                     { data: results, id: newGuid }
             });
         });
+
         return newGuid;
     }
 

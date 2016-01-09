@@ -5,6 +5,7 @@ using System.Data.Entity;
 using System.Linq;
 using Slack.Models;
 using Slack.Dtos;
+using System.Collections.Generic;
 
 namespace Slack.Controllers
 {
@@ -14,6 +15,27 @@ namespace Slack.Controllers
     {
         public MessageController(ISlackUow uow)
         :base(uow) { }
+
+        [HttpGet]
+        [Route("getByOtherProfileId")]
+        public IHttpActionResult GetByOtherProfileId(int otherProfileId)
+        {
+            var currentProfile = uow.Profiles
+                .GetAll()
+                .Where(x => x.Username == Username)
+                .Single();
+
+            var conversation = uow.Conversations
+                .GetAll()
+                .Include(x=>x.Messages)
+                .Where(x => x.Profiles.Any(p => p.Id == currentProfile.Id) && x.Profiles.Any(p => p.Id == otherProfileId))
+                .FirstOrDefault();
+
+            if (conversation == null)
+                return Ok(new List<MessageDto>());
+
+            return Ok(conversation.Messages.Select(x => new MessageDto(x)));            
+        }
 
         [HttpPost]
         [Route("send")]

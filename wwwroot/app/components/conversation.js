@@ -4,15 +4,21 @@
 }
 
 conversationComponent.canActivate = function () {
-    return ["$q", "$route", "invokeAsync","profileActions",
-        function ($q, $route, invokeAsync, profileActions) {
+    return ["$q", "$route", "invokeAsync", "messageActions", "profileActions",
+        function ($q, $route, invokeAsync, messageActions, profileActions) {
             var promises = [];
             var deferred = $q.defer();
-            if ($route.current.params.profileId)
+            if ($route.current.params.profileId) {
                 promises.push(invokeAsync({
                     action: profileActions.getOtherProfile,
                     params: { id: Number($route.current.params.profileId) }
                 }));
+
+                promises.push(invokeAsync({
+                    action: messageActions.getMessagesByOtherProfileId,
+                    params: { otherProfileId: Number($route.current.params.profileId) }
+                }))
+            }
 
             promises.push(invokeAsync(profileActions.getCurrentProfile));
             promises.push(invokeAsync(profileActions.getOtherProfiles));

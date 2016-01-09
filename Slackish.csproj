@@ -205,7 +205,7 @@
     <Content Include="Web.config" />
     <Content Include="wwwroot\app\actions\action-constants.js" />
     <Content Include="wwwroot\app\actions\conversation-actions.js" />
-    <Content Include="wwwroot\app\actions\messageActions.js" />
+    <Content Include="wwwroot\app\actions\message-actions.js" />
     <Content Include="wwwroot\app\actions\profile-actions.js" />
     <Content Include="wwwroot\app\app.module.js" />
     <Content Include="wwwroot\app\components\about-conversation.js" />
@@ -239,6 +239,7 @@
     <Content Include="wwwroot\app\domain\message.js" />
     <Content Include="wwwroot\app\domain\profile.js" />
     <Content Include="wwwroot\app\metal\jQuery.js" />
+    <Content Include="wwwroot\app\metal\safeDigest.js" />
     <Content Include="wwwroot\app\services\conversation-service.js" />
     <Content Include="wwwroot\app\services\message-service.js" />
     <Content Include="wwwroot\app\services\profile-service.js" />

@@ -47,38 +47,39 @@
 	__webpack_require__(1);
 
 	__webpack_require__(2);
-
 	__webpack_require__(3);
+
 	__webpack_require__(4);
 	__webpack_require__(5);
 	__webpack_require__(6);
-
 	__webpack_require__(7);
+
 	__webpack_require__(8);
-	__webpack_require__(9)
+	__webpack_require__(9);
 	__webpack_require__(10)
 	__webpack_require__(11)
-	__webpack_require__(12);
+	__webpack_require__(12)
 	__webpack_require__(13);
 	__webpack_require__(14);
 	__webpack_require__(15);
 	__webpack_require__(16);
 	__webpack_require__(17);
 	__webpack_require__(18);
-
 	__webpack_require__(19);
+
 	__webpack_require__(20);
 	__webpack_require__(21);
 	__webpack_require__(22);
-
 	__webpack_require__(23);
+
 	__webpack_require__(24);
 	__webpack_require__(25);
-
 	__webpack_require__(26);
+
 	__webpack_require__(27);
 	__webpack_require__(28);
 	__webpack_require__(29);
+	__webpack_require__(30);
 
 /***/ },
 /* 1 */
@@ -100,6 +101,17 @@
 /* 3 */
 /***/ function(module, exports) {
 
+	function safeDigest(scope) {
+	    if (!scope.$$phase && (scope.$root && !scope.$root.$$phase))
+	        scope.$digest();
+	}
+
+	angular.module("app").value("safeDigest", safeDigest);
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
 	angular.module("app").value("PROFILE_ACTIONS", {
 	    LOGIN: 0,
 	    LOGIN_FAIL: 1,
@@ -115,11 +127,12 @@
 	});
 
 	angular.module("app").value("MESSAGE_ACTIONS", {
-	    SEND: 9
+	    SEND: 9,
+	    GET_BY_OTHER_PROFILE: 10
 	});
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports) {
 
 	function conversationActions(dispatcher, formEncode, guid, conversationService, CONVERSATION_ACTIONS) {
@@ -134,6 +147,7 @@
 	                    { data: results, id: newGuid }
 	            });
 	        });
+
 	        return newGuid;
 	    }
 
@@ -146,7 +160,7 @@
 
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports) {
 
 	function profileActions(dispatcher, formEncode, guid, profileService, PROFILE_ACTIONS) {
@@ -239,7 +253,7 @@
 
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports) {
 
 	function messageActions(dispatcher, formEncode, guid, messageService, MESSAGE_ACTIONS) {
@@ -259,6 +273,21 @@
 	        return newGuid;
 	    }
 
+	    self.getMessagesByOtherProfileId = function (options) {
+	        var newGuid = guid();
+
+	        messageService.getByOtherProfileId({
+	            otherProfileId: options.otherProfileId
+	        }).then(function (results) {
+	            dispatcher.emit({
+	                actionType: MESSAGE_ACTIONS.GET_BY_OTHER_PROFILE, options:
+	                    { data: results, id: newGuid }
+	            });
+	        });
+
+	        return newGuid;
+	    }
+
 	    return self;
 	}
 
@@ -268,7 +297,7 @@
 
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports) {
 
 	function aboutConversationComponent(profileStore) {
@@ -301,7 +330,7 @@
 
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports) {
 
 	function appComponent() {
@@ -348,7 +377,7 @@
 	}]);
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports) {
 
 	function conversationDetailHeaderComponent(profileStore) {
@@ -384,7 +413,7 @@
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports) {
 
 	function conversationDetailComponent(profileStore) {
@@ -419,7 +448,7 @@
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports) {
 
 	function conversationListHeaderComponent(profileStore) {
@@ -455,7 +484,7 @@
 
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports) {
 
 	function conversationListComponent() {
@@ -481,18 +510,34 @@
 
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports) {
 
-	function conversationMessagesComponent($location, conversationList, conversationStore, messageStore, profileActions) {
+	function conversationMessagesComponent($location, $scope, conversationList, conversationStore, messageStore, profileActions, profileStore, safeDigest) {
 	    var self = this;
 
 	    self.conversations = [];
 
 	    self.messages = [];
 
+	    self.onInit = function () {
+	        for (var i = 0; i < messageStore.items.length; i++) {
+	            if(messageStore.items[i].fromId == profileStore.current.id 
+	                && messageStore.items[i].toId == profileStore.other.id) {
+	                self.messages.push(messageStore.items[i]);
+	            }
+
+	            if (messageStore.items[i].toId == profileStore.current.id
+	                && messageStore.items[i].fromId == profileStore.other.id) {
+	                self.messages.push(messageStore.items[i]);
+	            }
+	        }
+	    }
+
 	    self.storeOnChange = function () {
-	        alert(messageStore.items.length);
+	        self.messages = [];
+	        self.onInit();
+	        safeDigest($scope);
 	    }
 
 	    return self;
@@ -504,15 +549,23 @@
 	    component: conversationMessagesComponent,
 	    template: [
 	        '<div class="conversationMessagesComponent">',
-	        '<message-form></message-form>',
+	        '   <message-form></message-form>',
+	        '   <div>',
+	        '       <div data-ng-repeat="message in vm.messages">',
+	        '           <span>{{ ::message.content }}</span>',
+	        '       </div>',
+	        '   </div>',
 	        '</div>'
 	    ],
 	    providers: [
 	        '$location',
+	        '$scope',
 	        'conversationList',
 	        'conversationStore',
 	        'messageStore',
-	        'profileActions'
+	        'profileActions',
+	        'profileStore',
+	        'safeDigest'
 	    ],
 	    styles: [
 	        ' .conversationMessagesComponent { ',
@@ -526,7 +579,7 @@
 
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports) {
 
 	function conversationComponent() {
@@ -535,15 +588,21 @@
 	}
 
 	conversationComponent.canActivate = function () {
-	    return ["$q", "$route", "invokeAsync","profileActions",
-	        function ($q, $route, invokeAsync, profileActions) {
+	    return ["$q", "$route", "invokeAsync", "messageActions", "profileActions",
+	        function ($q, $route, invokeAsync, messageActions, profileActions) {
 	            var promises = [];
 	            var deferred = $q.defer();
-	            if ($route.current.params.profileId)
+	            if ($route.current.params.profileId) {
 	                promises.push(invokeAsync({
 	                    action: profileActions.getOtherProfile,
 	                    params: { id: Number($route.current.params.profileId) }
 	                }));
+
+	                promises.push(invokeAsync({
+	                    action: messageActions.getMessagesByOtherProfileId,
+	                    params: { otherProfileId: Number($route.current.params.profileId) }
+	                }))
+	            }
 
 	            promises.push(invokeAsync(profileActions.getCurrentProfile));
 	            promises.push(invokeAsync(profileActions.getOtherProfiles));
@@ -590,7 +649,7 @@
 
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports) {
 
 	function loginComponent($location, invokeAsync, profileActions, securityStore) {
@@ -637,7 +696,7 @@
 
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports) {
 
 	
@@ -685,7 +744,7 @@
 
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports) {
 
 	function registrationComponent($location, profileActions) {
@@ -725,7 +784,7 @@
 
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports) {
 
 	function messsageFormComponent(messageActions, profileStore) {
@@ -768,7 +827,7 @@
 	});
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports) {
 
 	function conversation() {
@@ -780,7 +839,7 @@
 	angular.module("app").service("conversation", conversation);
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports) {
 
 	function conversationList($injector) {
@@ -803,7 +862,7 @@
 	angular.module("app").service("conversationList", ["$injector",conversationList]);
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports) {
 
 	function message() {
@@ -815,7 +874,7 @@
 	angular.module("app").service("message", message);
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports) {
 
 	function profile() {
@@ -827,7 +886,7 @@
 	angular.module("app").service("profile", profile);
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports) {
 
 	function conversationService($q, apiEndpoint, fetch) {
@@ -839,7 +898,7 @@
 	angular.module("app").service("conversationService", ["$q", "apiEndpoint", "fetch", conversationService]);
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports) {
 
 	function messageService($q, apiEndpoint, fetch) {
@@ -859,13 +918,25 @@
 	        return deferred.promise;
 	    };
 
+	    self.getByOtherProfileId = function (options) {
+	        var deferred = $q.defer();
+	        fetch.fromService({
+	            method: "GET", url: self.baseUri + "/getByOtherProfileId", params:
+	                {
+	                    otherProfileId: options.otherProfileId
+	                }
+	        }).then(function (results) {
+	            deferred.resolve(results.data);
+	        });
+	        return deferred.promise;
+	    };
 	    self.baseUri = apiEndpoint.getBaseUrl() + "/message";
 	}
 
 	angular.module("app").service("messageService", ["$q", "apiEndpoint", "fetch", messageService]);
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports) {
 
 	function profileService($q, apiEndpoint, fetch, formEncode) {
@@ -924,7 +995,7 @@
 	angular.module("app").service("profileService", ["$q", "apiEndpoint", "fetch", "formEncode", profileService]);
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports) {
 
 	function conversationStore($, dispatcher, CONVERSATION_ACTIONS) {
@@ -947,7 +1018,7 @@
 	ngX.Store({ store: conversationStore, providers: ["$","dispatcher", "CONVERSATION_ACTIONS"] });
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports) {
 
 	function messageStore($, dispatcher, MESSAGE_ACTIONS) {
@@ -956,10 +1027,26 @@
 	    self.connection = $.hubConnection();
 	    self.hub = self.connection.createHubProxy("messageHub");
 
+	    self.hub.on("broadcastMessage", function (results) {
+	        self.storeInstance.addOrUpdate({ data: results });
+	        self.storeInstance.emitChange();
+	    });
+
 	    dispatcher.addListener({
 	        actionType: MESSAGE_ACTIONS.SEND,
 	        callback: function (options) {
 	            self.storeInstance.addOrUpdate({ data: options.data });
+	            self.storeInstance.emitChange({ id: options.id });
+	            self.hub.invoke("send", options.data);
+	        }
+	    });
+
+	    dispatcher.addListener({
+	        actionType: MESSAGE_ACTIONS.GET_BY_OTHER_PROFILE,
+	        callback: function (options) {
+	            for (var i = 0; i < options.data.length; i++) {
+	                self.storeInstance.addOrUpdate({ data: options.data[i] });
+	            }            
 	            self.storeInstance.emitChange({ id: options.id });
 	        }
 	    });
@@ -970,7 +1057,7 @@
 	ngX.Store({ store: messageStore, providers: ["$","dispatcher", "MESSAGE_ACTIONS"] });
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports) {
 
 	function profileStore(dispatcher, PROFILE_ACTIONS) {
@@ -1009,7 +1096,7 @@
 	ngX.Store({ store: profileStore, providers: ["dispatcher", "PROFILE_ACTIONS"] });
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports) {
 
 	function securityStore(dispatcher, localStorageManager, PROFILE_ACTIONS) {

@@ -13,5 +13,6 @@ angular.module("app").value("CONVERSATION_ACTIONS", {
 });
 
 angular.module("app").value("MESSAGE_ACTIONS", {
-    SEND: 9
+    SEND: 9,
+    GET_BY_OTHER_PROFILE: 10
 });

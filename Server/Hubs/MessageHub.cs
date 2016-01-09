@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
+using Slack.Dtos;
 
 namespace Slack.Hubs
 {
     [HubName("messageHub")]
     public class MessageHub : Hub
     {
-        public void Send(string username, string message)
+        public void Send(MessageDto dto)
         {
-            Clients.All.broadcastMessage(new { username = username, message = message });
+            Clients.Others.broadcastMessage(dto);
         }
     }
 }
