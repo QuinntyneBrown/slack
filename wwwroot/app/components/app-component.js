@@ -29,8 +29,14 @@ angular.module("app").config(['$routeProvider', function ($routeProvider) {
         "componentName": "registrationComponent"
     });
 
+    $routeProvider.when("/conversation/:profileId", {
+        "componentName": "conversationComponent"
+    });
+
     $routeProvider.when("/conversation", {
         "componentName": "conversationComponent"
     });
+
+
 
 }]);

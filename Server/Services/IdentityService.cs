@@ -27,7 +27,11 @@ namespace Slack.Services
 
         public ICollection<Claim> GetClaimsForUser(string username)
         {
-            return new List<Claim>();
+            var claims = new List<Claim>();
+            
+            claims.Add(new Claim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name", username));
+            
+            return claims;
         }
         
         public TokenDto TryToRegister(RegistrationRequestDto registrationRequestDto)

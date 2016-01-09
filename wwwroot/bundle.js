@@ -62,15 +62,16 @@
 	__webpack_require__(12);
 	__webpack_require__(13);
 	__webpack_require__(14);
-
 	__webpack_require__(15);
+
 	__webpack_require__(16);
 	__webpack_require__(17);
-
 	__webpack_require__(18);
+
 	__webpack_require__(19);
 	__webpack_require__(20);
 	__webpack_require__(21);
+	__webpack_require__(22);
 
 /***/ },
 /* 1 */
@@ -95,7 +96,9 @@
 	angular.module("app").value("PROFILE_ACTIONS", {
 	    LOGIN: 0,
 	    LOGIN_FAIL: 1,
-	    REGISTER: 3
+	    REGISTER: 3,
+	    CURRENT_PROFILE: 4,
+	    OTHER_PROFILES: 5
 	});
 
 	angular.module("app").value("CONVERSATION_ACTIONS", {
@@ -118,6 +121,7 @@
 
 	function profileActions(dispatcher, formEncode, guid, profileService, PROFILE_ACTIONS) {
 	    var self = this;
+
 	    self.login = function (options) {
 	        var newGuid = guid();
 	        profileService.tryToLogin({
@@ -145,7 +149,6 @@
 	        return newGuid;
 	    };
 
-
 	    self.register = function (options) {
 	        var newGuid = guid();
 
@@ -161,6 +164,29 @@
 	        return newGuid;
 	    }
 
+	    self.getCurrentProfile = function () {
+	        var newGuid = guid();
+
+	        profileService.getCurrentProfile().then(function (results) {
+	            dispatcher.emit({
+	                actionType: PROFILE_ACTIONS.CURRENT_PROFILE, options:
+	                    { data: results, id: newGuid }
+	            });
+	        });
+	        return newGuid;
+	    }
+
+	    self.getOtherProfiles = function () {
+	        var newGuid = guid();
+
+	        profileService.getOtherProfiles().then(function (results) {
+	            dispatcher.emit({
+	                actionType: PROFILE_ACTIONS.OTHER_PROFILES, options:
+	                    { data: results, id: newGuid }
+	            });
+	        });
+	        return newGuid;
+	    }
 	    return self;
 	}
 
@@ -204,9 +230,15 @@
 	        "componentName": "registrationComponent"
 	    });
 
+	    $routeProvider.when("/conversation/:profileId", {
+	        "componentName": "conversationComponent"
+	    });
+
 	    $routeProvider.when("/conversation", {
 	        "componentName": "conversationComponent"
 	    });
+
+
 
 	}]);
 
@@ -214,14 +246,25 @@
 /* 7 */
 /***/ function(module, exports) {
 
-	function conversationComponent(profileStore, conversationStore) {
+	function conversationComponent() {
 	    var self = this;
 	    return self;
 	}
 
+	conversationComponent.canActivate = function () {
+	    return ["$q","invokeAsync","profileActions",
+	        function ($q, invokeAsync, profileActions) {
+	            return $q.all([
+	                invokeAsync(profileActions.getCurrentProfile),
+	                invokeAsync(profileActions.getOtherProfiles)
+	            ]);
+	        }
+	    ]
+	}
+
 	ngX.Component({
 	    isBootstrapped: true,
-	    route:'/conversation',
+	    routes: ['/conversation','/conversation/:profileId'],
 	    component: conversationComponent,
 	    template: [
 	        '<div class="conversationComponent">',
@@ -229,10 +272,6 @@
 	        '<div class="conversationComponent-messageList"><message-list></message-list></div>',
 	        '<div style="clear:both;"></div>',
 	        '</div>'
-	    ],
-	    providers: [
-	        'profileStore',
-	        'conversationStore',
 	    ],
 	    styles: [
 	        ' .conversationComponent { ',
@@ -243,7 +282,7 @@
 	        '   background-color: rgb(77,57,75); ',
 	        '   postion:relative; float:left;',
 	        '   min-height: 100%; ',
-	        '   color: #EEE; ',
+	        '   color: #CCC; ',
 	        '   width:225px; ',
 	        ' } ',
 	        ' .conversationComponent-messageList { ',
@@ -344,6 +383,7 @@
 	function conversationListComponent($location, profileActions, profileStore) {
 	    var self = this;
 	    self.current = profileStore.current;
+	    self.others = profileStore.otherProfiles;
 	    return self;
 	}
 
@@ -353,8 +393,14 @@
 	    component: conversationListComponent,
 	    template: [
 	        '<div class="conversationListComponent">',
-	        '<h1>slack</h1>',
-	        '<span>{{ ::vm.current.username }}</span>',
+	        '   <h1>slack</h1>',
+	        '   <span>{{ ::vm.current.username }}</span>',
+	        '   <div>',
+	        '       <h2>DIRECT MESSAGES</h2>',
+	        '       <div data-ng-repeat="profile in vm.others">',
+	        '           <a class="conversationListComponent-otherProfile" href="#/conversation/{{ ::profile.id }}">{{ ::profile.username }}</a>',
+	        '       </div>',
+	        '   </div>',
 	        '</div>'
 	    ],
 	    providers: [
@@ -369,6 +415,8 @@
 	        ' .conversationListComponent h1 { ',
 	        '   color: #FFF; ',
 	        ' } ',
+	        ' .conversationListComponent h2 { font-size: 1.2em; font-weight:400; } ',
+	        ' .conversationListComponent-otherProfile { color:#CCC; text-decoration:none; } ',
 	    ]
 	});
 
@@ -408,34 +456,87 @@
 /* 12 */
 /***/ function(module, exports) {
 
-	
+	function conversation() {
+	    var self = this;
+
+	    return self;
+	}
+
+	angular.module("app").service("conversation", conversation);
 
 /***/ },
 /* 13 */
 /***/ function(module, exports) {
 
-	
+	function conversationList($injector) {
+	    var self = this;
+	    self.$injector = $injector;
+
+	    self.createInstance = function (options) {
+	        var instance = new conversationList(self.$injector);
+
+	        if (options.data) {
+
+	        }
+
+	        return instance;
+	    }
+
+	    return self;
+	}
+
+	angular.module("app").service("conversationList", ["$injector",conversationList]);
 
 /***/ },
 /* 14 */
 /***/ function(module, exports) {
 
-	
+	function message() {
+	    var self = this;
+
+	    return self;
+	}
+
+	angular.module("app").service("message", message);
 
 /***/ },
 /* 15 */
 /***/ function(module, exports) {
 
-	
+	function profile() {
+	    var self = this;
+
+	    return self;
+	}
+
+	angular.module("app").service("profile", profile);
 
 /***/ },
 /* 16 */
 /***/ function(module, exports) {
 
-	
+	function conversationService($q, apiEndpoint, fetch) {
+	    var self = this;
+
+
+	}
+
+	angular.module("app").service("conversationService", ["$q", "apiEndpoint", "fetch", conversationService]);
 
 /***/ },
 /* 17 */
+/***/ function(module, exports) {
+
+	function messageService($q, apiEndpoint, fetch) {
+	    var self = this;
+
+
+	}
+
+	angular.module("app").service("messageService", ["$q", "apiEndpoint", "fetch", messageService]);
+
+/***/ },
+/* 18 */
 /***/ function(module, exports) {
 
 	function profileService($q, apiEndpoint, fetch, formEncode) {
@@ -454,19 +555,29 @@
 	        return deferred.promise;
 	    };
 
-
 	    self.tryToRegister = function (options) {
 	        var deferred = self.$q.defer();
-
-
-
-	        //fetch.fromService({ method: "POST", url: self.baseUri + "/register", data: { username: options.username, password: options.password } }).then(function (results) {
-	        //    deferred.resolve(results.data);
-	        //});
+	        fetch.fromService({ method: "POST", url: self.baseUri + "/register", data: { username: options.username, password: options.password } }).then(function (results) {
+	            deferred.resolve(results.data);
+	        });
 	        return deferred.promise;
 	    };
 
-	    
+	    self.getCurrentProfile = function (options) {
+	        var deferred = self.$q.defer();
+	        fetch.fromService({ method: "GET", url: self.baseUri + "/getCurrentProfile" }).then(function (results) {
+	            deferred.resolve(results.data);
+	        });
+	        return deferred.promise;
+	    };
+
+	    self.getOtherProfiles = function (options) {
+	        var deferred = self.$q.defer();
+	        fetch.fromService({ method: "GET", url: self.baseUri + "/getOtherProfiles" }).then(function (results) {
+	            deferred.resolve(results.data);
+	        });
+	        return deferred.promise;
+	    };
 
 	    self.baseUri = apiEndpoint.getBaseUrl() + "/profile";
 
@@ -476,7 +587,7 @@
 	angular.module("app").service("profileService", ["$q", "apiEndpoint", "fetch", "formEncode", profileService]);
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports) {
 
 	function conversationStore($, dispatcher, CONVERSATION_ACTIONS) {
@@ -491,7 +602,7 @@
 	ngX.Store({ store: conversationStore, providers: ["$","dispatcher", "CONVERSATION_ACTIONS"] });
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports) {
 
 	function messageStore($, dispatcher, MESSAGE_ACTIONS) {
@@ -506,7 +617,7 @@
 	ngX.Store({ store: messageStore, providers: ["$","dispatcher", "MESSAGE_ACTIONS"] });
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports) {
 
 	function profileStore(dispatcher, PROFILE_ACTIONS) {
@@ -515,13 +626,29 @@
 	    self.connection = $.hubConnection();
 	    self.hub = self.connection.createHubProxy("profileHub");
 
+	    dispatcher.addListener({
+	        actionType: PROFILE_ACTIONS.CURRENT_PROFILE,
+	        callback: function (options) {
+	            self.current = options.data;
+	            self.storeInstance.emitChange({ id: options.id });
+	        }
+	    });
+
+	    dispatcher.addListener({
+	        actionType: PROFILE_ACTIONS.OTHER_PROFILES,
+	        callback: function (options) {
+	            self.otherProfiles = options.data;
+	            self.storeInstance.emitChange({ id: options.id });
+	        }
+	    });
+	    
 	    return self;
 	}
 
 	ngX.Store({ store: profileStore, providers: ["dispatcher", "PROFILE_ACTIONS"] });
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports) {
 
 	function securityStore(dispatcher, localStorageManager, PROFILE_ACTIONS) {

@@ -22,6 +22,22 @@
         return deferred.promise;
     };
 
+    self.getCurrentProfile = function (options) {
+        var deferred = self.$q.defer();
+        fetch.fromService({ method: "GET", url: self.baseUri + "/getCurrentProfile" }).then(function (results) {
+            deferred.resolve(results.data);
+        });
+        return deferred.promise;
+    };
+
+    self.getOtherProfiles = function (options) {
+        var deferred = self.$q.defer();
+        fetch.fromService({ method: "GET", url: self.baseUri + "/getOtherProfiles" }).then(function (results) {
+            deferred.resolve(results.data);
+        });
+        return deferred.promise;
+    };
+
     self.baseUri = apiEndpoint.getBaseUrl() + "/profile";
 
     return self;

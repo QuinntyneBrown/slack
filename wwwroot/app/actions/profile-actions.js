@@ -1,5 +1,6 @@
 ﻿function profileActions(dispatcher, formEncode, guid, profileService, PROFILE_ACTIONS) {
     var self = this;
+
     self.login = function (options) {
         var newGuid = guid();
         profileService.tryToLogin({
@@ -27,7 +28,6 @@
         return newGuid;
     };
 
-
     self.register = function (options) {
         var newGuid = guid();
 
@@ -43,6 +43,29 @@
         return newGuid;
     }
 
+    self.getCurrentProfile = function () {
+        var newGuid = guid();
+
+        profileService.getCurrentProfile().then(function (results) {
+            dispatcher.emit({
+                actionType: PROFILE_ACTIONS.CURRENT_PROFILE, options:
+                    { data: results, id: newGuid }
+            });
+        });
+        return newGuid;
+    }
+
+    self.getOtherProfiles = function () {
+        var newGuid = guid();
+
+        profileService.getOtherProfiles().then(function (results) {
+            dispatcher.emit({
+                actionType: PROFILE_ACTIONS.OTHER_PROFILES, options:
+                    { data: results, id: newGuid }
+            });
+        });
+        return newGuid;
+    }
     return self;
 }
 

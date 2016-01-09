@@ -1,11 +1,22 @@
-﻿function conversationComponent(profileStore, conversationStore) {
+﻿function conversationComponent() {
     var self = this;
     return self;
 }
 
+conversationComponent.canActivate = function () {
+    return ["$q","invokeAsync","profileActions",
+        function ($q, invokeAsync, profileActions) {
+            return $q.all([
+                invokeAsync(profileActions.getCurrentProfile),
+                invokeAsync(profileActions.getOtherProfiles)
+            ]);
+        }
+    ]
+}
+
 ngX.Component({
     isBootstrapped: true,
-    route:'/conversation',
+    routes: ['/conversation','/conversation/:profileId'],
     component: conversationComponent,
     template: [
         '<div class="conversationComponent">',
@@ -13,10 +24,6 @@ ngX.Component({
         '<div class="conversationComponent-messageList"><message-list></message-list></div>',
         '<div style="clear:both;"></div>',
         '</div>'
-    ],
-    providers: [
-        'profileStore',
-        'conversationStore',
     ],
     styles: [
         ' .conversationComponent { ',
@@ -27,7 +34,7 @@ ngX.Component({
         '   background-color: rgb(77,57,75); ',
         '   postion:relative; float:left;',
         '   min-height: 100%; ',
-        '   color: #EEE; ',
+        '   color: #CCC; ',
         '   width:225px; ',
         ' } ',
         ' .conversationComponent-messageList { ',

@@ -216,6 +216,7 @@
     <Content Include="wwwroot\app\components\message-list-component.js" />
     <Content Include="wwwroot\app\components\registration-component.js" />
     <Content Include="wwwroot\app\domain\conversation.js" />
+    <Content Include="wwwroot\app\domain\conversation-list.js" />
     <Content Include="wwwroot\app\domain\message.js" />
     <Content Include="wwwroot\app\domain\profile.js" />
     <Content Include="wwwroot\app\metal\jQuery.js" />

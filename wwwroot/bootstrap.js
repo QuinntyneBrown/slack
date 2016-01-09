@@ -14,6 +14,7 @@ require('./app/components/conversation-list-component.js');
 require('./app/components/message-list-component.js');
 
 require('./app/domain/conversation.js');
+require('./app/domain/conversation-list.js');
 require('./app/domain/message.js');
 require('./app/domain/profile.js');
 
