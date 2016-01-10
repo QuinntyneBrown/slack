@@ -520,15 +520,26 @@
 
 	    self.messages = [];
 
+	    self.current = profileStore.current;
+	    self.other = profileStore.other;
+
+	    self.isFromOther = function (message) {
+	        return message.toId == profileStore.current.id
+	                && message.fromId == profileStore.other.id
+	    }
+
+	    self.isToOther = function (message) {
+	        return message.fromId == profileStore.current.id
+	                && message.toId == profileStore.other.id
+	    }
+
+	    self.isInCurrentConversation = function (message) {
+	        return self.isFromOther(message) || self.isToOther(message);
+	    }
+
 	    self.onInit = function () {
 	        for (var i = 0; i < messageStore.items.length; i++) {
-	            if(messageStore.items[i].fromId == profileStore.current.id 
-	                && messageStore.items[i].toId == profileStore.other.id) {
-	                self.messages.push(messageStore.items[i]);
-	            }
-
-	            if (messageStore.items[i].toId == profileStore.current.id
-	                && messageStore.items[i].fromId == profileStore.other.id) {
+	            if (self.isInCurrentConversation(messageStore.items[i])) {
 	                self.messages.push(messageStore.items[i]);
 	            }
 	        }
@@ -552,7 +563,8 @@
 	        '   <message-form></message-form>',
 	        '   <div>',
 	        '       <div data-ng-repeat="message in vm.messages">',
-	        '           <span>{{ ::message.content }}</span>',
+	        '           <span data-ng-if="vm.isFromOther(message)">{{ ::vm.other.username }} : {{ ::message.content }}</span>',
+	        '           <span data-ng-if="vm.isToOther(message)">{{ ::vm.current.username }} : {{ ::message.content }}</span>',
 	        '       </div>',
 	        '   </div>',
 	        '</div>'
@@ -655,9 +667,6 @@
 	function loginComponent($location, invokeAsync, profileActions, securityStore) {
 	    var self = this;
 
-	    self.username = 'kobe';
-	    self.password = 'password';
-
 	    self.login = function () {
 	        invokeAsync({
 	            action: profileActions.login,
@@ -747,19 +756,20 @@
 /* 18 */
 /***/ function(module, exports) {
 
-	function registrationComponent($location, profileActions) {
+	function registrationComponent($location, invokeAsync, profileActions) {
 	    var self = this;
 
 	    self.register = function () {
-
-	        profileActions.register({
-	            username: self.username,
-	            password: self.password
+	        invokeAsync({
+	            action: profileActions.register,
+	            params: {
+	                username: self.username,
+	                password: self.password
+	            }
+	        }).then(function (results) {
+	            $location.path('/');
+	            alert('login');
 	        });
-	    }
-
-	    self.storeOnChange = function () {
-	        $location.path('/conversation');
 	    }
 
 	    return self;
@@ -778,6 +788,7 @@
 	    ],
 	    providers: [
 	        '$location',
+	        'invokeAsync',
 	        'profileActions'
 	    ]
 	});
@@ -1090,6 +1101,12 @@
 	        }
 	    });
 	    
+	    dispatcher.addListener({
+	        actionType: PROFILE_ACTIONS.REGISTER,
+	        callback: function (options) {
+	            self.storeInstance.emitChange({ id: options.id });
+	        }
+	    });
 	    return self;
 	}
 

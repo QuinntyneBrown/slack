@@ -20,6 +20,8 @@ namespace Slack.Controllers
         [Route("getByOtherProfileId")]
         public IHttpActionResult GetByOtherProfileId(int otherProfileId)
         {
+            IEnumerable<MessageDto> response = new List<MessageDto>();
+
             var currentProfile = uow.Profiles
                 .GetAll()
                 .Where(x => x.Username == Username)
@@ -31,10 +33,10 @@ namespace Slack.Controllers
                 .Where(x => x.Profiles.Any(p => p.Id == currentProfile.Id) && x.Profiles.Any(p => p.Id == otherProfileId))
                 .FirstOrDefault();
 
-            if (conversation == null)
-                return Ok(new List<MessageDto>());
+            if (conversation != null)
+                response = conversation.Messages.Select(x => new MessageDto(x));
 
-            return Ok(conversation.Messages.Select(x => new MessageDto(x)));            
+            return Ok(response);            
         }
 
         [HttpPost]

@@ -184,6 +184,8 @@
   <ItemGroup>
     <Content Include="packages.config" />
     <Content Include="package.json" />
+    <None Include="Properties\PublishProfiles\slackish - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\slackish - Web Deploy.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -202,7 +204,9 @@
     <Content Include="node_modules\angular-route\angular-route.js" />
     <Content Include="node_modules\angular\angular.js" />
     <Content Include="node_modules\ng-x\dist\ngX.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="wwwroot\app\actions\action-constants.js" />
     <Content Include="wwwroot\app\actions\conversation-actions.js" />
     <Content Include="wwwroot\app\actions\message-actions.js" />

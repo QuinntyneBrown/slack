@@ -1,9 +1,6 @@
 ﻿function loginComponent($location, invokeAsync, profileActions, securityStore) {
     var self = this;
 
-    self.username = 'kobe';
-    self.password = 'password';
-
     self.login = function () {
         invokeAsync({
             action: profileActions.login,

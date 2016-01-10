@@ -28,6 +28,12 @@
         }
     });
     
+    dispatcher.addListener({
+        actionType: PROFILE_ACTIONS.REGISTER,
+        callback: function (options) {
+            self.storeInstance.emitChange({ id: options.id });
+        }
+    });
     return self;
 }
 

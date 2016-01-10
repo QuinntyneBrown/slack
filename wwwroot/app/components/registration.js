@@ -1,16 +1,17 @@
-﻿function registrationComponent($location, profileActions) {
+﻿function registrationComponent($location, invokeAsync, profileActions) {
     var self = this;
 
     self.register = function () {
-
-        profileActions.register({
-            username: self.username,
-            password: self.password
+        invokeAsync({
+            action: profileActions.register,
+            params: {
+                username: self.username,
+                password: self.password
+            }
+        }).then(function (results) {
+            $location.path('/');
+            alert('login');
         });
-    }
-
-    self.storeOnChange = function () {
-        $location.path('/conversation');
     }
 
     return self;
@@ -29,6 +30,7 @@ ngX.Component({
     ],
     providers: [
         '$location',
+        'invokeAsync',
         'profileActions'
     ]
 });
